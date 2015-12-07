@@ -24,69 +24,104 @@ import org.opencompare.api.java.io.PCMLoader;
  */
 public class GettingStartedTest {
 
-    @Test
-    public void testGettingStarted() throws IOException { //Ici, on ne teste que l'export d'une matrice
+	@Test
+	public void testGettingStarted() throws IOException { //Ici, on ne teste que l'export d'une matrice
 
-        // Define a file representing a PCM to load
-        File pcmFile = new File("pcms/example.pcm");
+		// Define a file representing a PCM to load
+		File pcmFile = new File("/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1/Comparison_of_Sony_Vaio_laptops_5.pcm");
 
-        // Create a loader that can handle the file format
-        PCMLoader loader = new KMFJSONLoader();
+		// Create a loader that can handle the file format
+		PCMLoader loader = new KMFJSONLoader();
 
-        // Load the file
-        // A loader may return multiple PCM containers depending on the input format
-        // A PCM container encapsulates a PCM and its associated metadata
-        List<PCMContainer> pcmContainers = loader.load(pcmFile); //Une seule matrice par fichier PCM
+		// Load the file
+		// A loader may return multiple PCM containers depending on the input format
+		// A PCM container encapsulates a PCM and its associated metadata
+		List<PCMContainer> pcmContainers = loader.load(pcmFile); //Une seule matrice par fichier PCM
 
-        for (PCMContainer pcmContainer : pcmContainers) {
+		for (PCMContainer pcmContainer : pcmContainers) {
 
-            // Get the PCM
-            PCM pcm = pcmContainer.getPcm();
+			// Get the PCM
+			PCM pcm = pcmContainer.getPcm();
 
-            // Browse the cells of the PCM
-            for (Product product : pcm.getProducts()) {
-                for (Feature feature : pcm.getConcreteFeatures()) {
+			// Browse the cells of the PCM
+			for (Product product : pcm.getProducts()) {
+				for (Feature feature : pcm.getConcreteFeatures()) {
 
-                    // Find the cell corresponding to the current feature and product
-                    Cell cell = product.findCell(feature);
+					// Find the cell corresponding to the current feature and product
+					Cell cell = product.findCell(feature);
 
-                    // Get information contained in the cell
-                    String content = cell.getContent();
-                    String rawContent = cell.getRawContent();
-                    Value interpretation = cell.getInterpretation();
+					// Get information contained in the cell
+					String content = cell.getContent();
+					String rawContent = cell.getRawContent();
+					Value interpretation = cell.getInterpretation();
 
-                    // Print the content of the cell
-                    System.out.println("(" + product.getName() + ", " + feature.getName() + ") = " + content);
-                    
-                }
-            }
+					// Print the content of the cell
+					System.out.println("(" + product.getName() + ", " + feature.getName() + ") = " + content);
 
-            // Export the PCM container to CSV
-            CSVExporter csvExporter = new CSVExporter();
-            String csv = csvExporter.export(pcmContainer);
+				}
+			}
 
-            // Write CSV content to file
-            Path outputFile = Files.createTempFile("oc-", ".csv");
-            Files.write(outputFile, csv.getBytes());
-            System.out.println("PCM exported to " + outputFile);
-            
-        }
-    }
-    
-    @Test
-    public void testCompteMatrices() throws IOException {
+			// Export the PCM container to CSV
+			CSVExporter csvExporter = new CSVExporter();
+			String csv = csvExporter.export(pcmContainer);
 
-        // Define a file representing a PCM to load
-    	String path = "/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1";
-        File pcmFile = new File(path);
-        File[] filesInDir = pcmFile.listFiles();
-        
-        int cpt=0;
-        
-        for (File f : filesInDir) {
-        	cpt += 1;
-        }
-        
-        assertEquals(cpt,1193); //1193 dans le dossier dataset-0.6.1
-    }
+			// Write CSV content to file
+			Path outputFile = Files.createTempFile("oc-", ".csv");
+			Files.write(outputFile, csv.getBytes());
+			System.out.println("PCM exported to " + outputFile);
+
+		}
+	}
+
+	@Test
+	public void testCompteMatrices() throws IOException {
+
+		// Define a file representing a PCM to load
+		String path = "/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1";
+		File pcmFile = new File(path);
+		File[] filesInDir = pcmFile.listFiles();
+
+		int cpt=0;
+
+		for (File f : filesInDir) {
+			cpt += 1;
+		}
+
+		assertEquals(cpt,1193); //1193 dans le dossier dataset-0.6.1
+	}
+
+	@Test
+	public void testExportCSV() throws IOException { //Ici, on ne teste que l'export d'une matrice
+
+		// Define a file representing a PCM to load
+		String path = "/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1";
+		File file = new File(path);
+		File[] filesInDir = file.listFiles();
+
+		// Create a loader that can handle the file format
+		
+
+		for (File f : filesInDir) {
+			String name = f.getName();
+			
+			PCMLoader loader = new KMFJSONLoader();
+			File pcmFile = new File (path + "/" + name);
+			List<PCMContainer> pcmContainers = loader.load(pcmFile);
+			
+			for (PCMContainer pcmContainer : pcmContainers) {
+				PCM pcm = pcmContainer.getPcm();
+
+				// Export the PCM container to CSV
+				CSVExporter csvExporter = new CSVExporter();
+				String csv = csvExporter.export(pcmContainer);
+				
+				name = name.substring(0, (name.length()-4));
+
+				// Write CSV content to file
+				Path outputFile = Files.createTempFile("oc-" + name + "_", ".csv");
+				Files.write(outputFile, csv.getBytes());
+				System.out.println("PCM exported to " + outputFile);
+			}
+		}
+	}
 }
