@@ -1,20 +1,23 @@
 package org.opencompare;
 
-import org.junit.Test;
-import org.opencompare.api.java.*;
-import org.opencompare.api.java.impl.io.KMFJSONLoader;
-import org.opencompare.api.java.io.CSVExporter;
-import org.opencompare.api.java.io.PCMLoader;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
+
+import org.junit.Test;
+import org.opencompare.api.java.Cell;
+import org.opencompare.api.java.Feature;
+import org.opencompare.api.java.PCM;
+import org.opencompare.api.java.PCMContainer;
+import org.opencompare.api.java.Product;
+import org.opencompare.api.java.Value;
+import org.opencompare.api.java.impl.io.KMFJSONLoader;
+import org.opencompare.api.java.io.CSVExporter;
+import org.opencompare.api.java.io.PCMLoader;
 
 /**
  * Created by gbecan on 02/12/15.
