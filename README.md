@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Getting started with OpenCompare
 
 Examples for using OpenCompare API and services
@@ -59,4 +59,3 @@ String csv = csvExporter.export(pcmContainer);
 =======
 # TPOpenCompare
 Génie logiciel : projet Open Compare à rendre avant le 20 décembre
->>>>>>> 0a1b5eea93898d11a79192f6bee08ec348226e3d
