@@ -6,8 +6,11 @@ import org.opencompare.api.java.impl.io.KMFJSONLoader;
 import org.opencompare.api.java.io.CSVExporter;
 import org.opencompare.api.java.io.PCMLoader;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,7 +22,7 @@ import java.util.List;
 public class GettingStartedTest {
 
     @Test
-    public void testGettingStarted() throws IOException {
+    public void testGettingStarted() throws IOException { //Ici, on ne teste que l'export d'une matrice
 
         // Define a file representing a PCM to load
         File pcmFile = new File("pcms/example.pcm");
@@ -30,7 +33,7 @@ public class GettingStartedTest {
         // Load the file
         // A loader may return multiple PCM containers depending on the input format
         // A PCM container encapsulates a PCM and its associated metadata
-        List<PCMContainer> pcmContainers = loader.load(pcmFile);
+        List<PCMContainer> pcmContainers = loader.load(pcmFile); //Une seule matrice par fichier PCM
 
         for (PCMContainer pcmContainer : pcmContainers) {
 
@@ -51,6 +54,7 @@ public class GettingStartedTest {
 
                     // Print the content of the cell
                     System.out.println("(" + product.getName() + ", " + feature.getName() + ") = " + content);
+                    
                 }
             }
 
@@ -62,7 +66,24 @@ public class GettingStartedTest {
             Path outputFile = Files.createTempFile("oc-", ".csv");
             Files.write(outputFile, csv.getBytes());
             System.out.println("PCM exported to " + outputFile);
+            
         }
+    }
+    
+    @Test
+    public void testCompteMatrices() throws IOException {
 
+        // Define a file representing a PCM to load
+    	String path = "/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1";
+        File pcmFile = new File(path);
+        File[] filesInDir = pcmFile.listFiles();
+        
+        int cpt=0;
+        
+        for (File f : filesInDir) {
+        	cpt += 1;
+        }
+        
+        assertEquals(cpt,1193); //1193 dans le dossier dataset-0.6.1
     }
 }
