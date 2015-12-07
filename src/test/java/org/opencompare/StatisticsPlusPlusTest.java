@@ -16,8 +16,10 @@ import org.opencompare.api.java.Product;
 import org.opencompare.api.java.Value;
 import org.opencompare.api.java.impl.io.KMFJSONLoader;
 import org.opencompare.api.java.io.PCMLoader;
+import org.opencompare.api.java.value.BooleanValue;
 import org.opencompare.api.java.value.IntegerValue;
 import org.opencompare.api.java.value.RealValue;
+import org.opencompare.api.java.value.StringValue;
 
 public class StatisticsPlusPlusTest {
 
@@ -25,8 +27,8 @@ public class StatisticsPlusPlusTest {
 	public void DSLtest() throws IOException {
 
 		//Initialisation des paramètres :
-		double threshold= 0.1;
-		int maxFacts=6;
+		double threshold= 0.9;
+		int maxFacts=5;
 		ArrayList<String> features = new ArrayList<String>();
 		//features.add("quantile");
 
@@ -47,7 +49,7 @@ public class StatisticsPlusPlusTest {
 				System.out.println("Fichier : "+f.getName());
 				System.out.println("--------------------------------------");
 				System.out.println("\n\n");
-						
+
 				int max = 0;
 				// Get the PCM
 				PCM pcm = pcmContainer.getPcm();
@@ -57,10 +59,12 @@ public class StatisticsPlusPlusTest {
 				for (Feature feature : pcm.getConcreteFeatures()) {
 					//On repère le nom de la colonne
 					String nom_variable = feature.getName();
-					System.out.println(nom_variable);
 
-					//Au début, on considère que la colonne contient des entiers
+					//On initialise des booleens pour pouvoir connaitre le type des variables
 					boolean nombre = true;
+					boolean chaine_caract = true;
+					boolean bool = true;
+					
 
 					ArrayList<Cell> colonne = new ArrayList<Cell>();
 
@@ -69,8 +73,18 @@ public class StatisticsPlusPlusTest {
 						// Find the cell corresponding to the current feature and product
 						Cell cell = product.findCell(feature);
 						Value interp = cell.getInterpretation();
-						if (!(interp instanceof IntegerValue | interp instanceof RealValue)){
+						
+						//On vérifie le type de la colonne
+						if (!(interp instanceof IntegerValue || interp instanceof RealValue)){
 							nombre=false;
+						}
+						
+						if (!(interp instanceof StringValue)){
+							chaine_caract=false;
+						}
+						
+						if (!(interp instanceof BooleanValue)){
+							bool=false;
 						}
 
 						//On stocke les variables dans une liste
@@ -86,8 +100,11 @@ public class StatisticsPlusPlusTest {
 							if(colonne.get(i).getInterpretation() instanceof IntegerValue){
 								valeurs[i]= Integer.parseInt(colonne.get(i).getContent());
 							}
+							else if(colonne.get(i).getInterpretation() instanceof RealValue){
+								valeurs[i]= Double.parseDouble(colonne.get(i).getContent());
+							}
 							else{
-								
+								System.out.println("Problème de type");
 							}
 						}
 
@@ -106,8 +123,8 @@ public class StatisticsPlusPlusTest {
 					}
 
 
-					// Sinon, on fait un compte par catégorie
-					else{
+					//Si la colonne contient des chaînes de caractères, on fait un compte par catégorie
+					if(chaine_caract){
 
 						//On stocke le contenu de la colonne dans un tableau de Strings
 						ArrayList<String> valeurs = new ArrayList<String>();
@@ -118,11 +135,14 @@ public class StatisticsPlusPlusTest {
 						ArrayList<String> categoriePrincipale = categorie(valeurs,threshold);
 						if (categoriePrincipale.size() != 0){
 							String fact = "Plus de "+(threshold*100)+"% des produits ont une valeur de " +nom_variable+" égale à ";
-								fact+= categoriePrincipale.get(0);
-							for (int i=1;i<categoriePrincipale.size();i++){
-								fact+= " et " +categoriePrincipale.get(i);
+							fact+= categoriePrincipale.get(0);
+							if(categoriePrincipale.size()>1){
+								for (int i=1;i<categoriePrincipale.size()-1;i++){
+									fact+= ", " +categoriePrincipale.get(i);
+								}
+								fact+= " et "+categoriePrincipale.get(categoriePrincipale.size()-1);
 							}
-							
+
 							//On vérifie si le nombre max de faits est atteint
 							if(facts.size()>=maxFacts){
 								//System.out.println("Le nombre de faits max pour la matrice est atteint.");
@@ -133,8 +153,38 @@ public class StatisticsPlusPlusTest {
 						}
 
 					}
+					
+					
+					// Si la clonne contient des booleens, on regarde le pourcentae de true et false 
+					if (bool){
+
+						//On stocke le contenu de la colonne dans un tableau de booleens
+						boolean[] valeurs = new boolean[colonne.size()];
+						for (int i=0;i<colonne.size();i++){
+							if(colonne.get(i).getInterpretation() instanceof BooleanValue){
+								valeurs[i]= Boolean.parseBoolean(colonne.get(i).getContent());
+							}
+							else{
+								System.out.println("Problème de type");
+							}
+						}
+
+						String bool_value = pourcentage(valeurs,threshold);
+						if (!(bool_value.equals(""))){
+							String fact = "Plus de "+(threshold*100)+"% des produits ont une valeur de " +nom_variable+" égale à "+bool_value; 
+							//On vérifie si le nombre max de faits est atteint
+							if(facts.size()>=maxFacts){
+								//System.out.println("Le nombre de faits max pour la matrice est atteint.");
+							}
+							else{
+								facts.add(fact);
+							}
+						}
+
+					}
+					
 				}
-				
+
 				if(facts.size()!=0){
 					for (int i=0;i<facts.size();i++){
 						System.out.println(facts.get(i));
@@ -166,9 +216,9 @@ public class StatisticsPlusPlusTest {
 		return res;
 	}
 
-	
-	
-	
+
+
+
 	public static ArrayList<String> categorie(ArrayList<String> values, double threshold) {
 
 		ArrayList<String> res = new ArrayList<String>();
@@ -178,9 +228,9 @@ public class StatisticsPlusPlusTest {
 			//On transforme le set en liste 
 			List<String> modalites = new ArrayList<>(uniqueValues);
 
-			
+
 			//On initialise un tableau vide qui contiendra les occurences de chaque modalité
-			int[] occurences = new int[modalites.size()];
+			double[] occurences = new double[modalites.size()];
 			for (int i=0;i<occurences.length;i++){
 				occurences[i]=0;
 			}
@@ -192,23 +242,12 @@ public class StatisticsPlusPlusTest {
 
 				//On incrémente la modalité reliée
 				for (int j=0;j<modalites.size();j++) {
-					if(temp==modalites.get(j)){
-						occurences[j]+=1;
+					if(temp.equals(modalites.get(j))){
+						occurences[j]++;
 					}
 				}
 			}
-			
-			System.out.print("Modalités différentes : ");
-			for (int i=0;i<modalites.size();i++){
-				System.out.print(modalites.get(i)+ " - ");
-			}
-			System.out.println("\n");
-			System.out.print("Occurences : ");
-			for (int i=0;i<occurences.length;i++){
-				System.out.print(occurences[i]+ " - ");
-			}
-			System.out.println("\n");
-			
+
 			//On regarde si une modalité est présente dans plus de threshold % des cas
 			for (int k=0;k<occurences.length;k++){
 				double percent = occurences[k]/values.size();
@@ -220,6 +259,31 @@ public class StatisticsPlusPlusTest {
 				}
 			}
 
+		}
+		return res;
+	}
+	
+	public static String pourcentage(boolean[] values, double threshold) {
+
+		String res = "";
+		//On vérifie que la matrice a une ligne
+		if (!(values == null || values.length == 0)) {
+			double nb_bool=0;
+			//On parcours le tableau de booleans et on calcule le pourcentage de true et false
+			for (int i=0;i<values.length;i++){
+				if(values[i]){
+					nb_bool++;
+				}
+			}
+			
+			//On regarde la valeur du pourcentage pour regarder la valeur à retourner
+			double percent = nb_bool/values.length;
+			if(percent>=threshold){
+				res="True";
+			}
+			else{
+				res="False";
+			}
 		}
 		return res;
 	}
