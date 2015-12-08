@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,11 +29,43 @@ public class StatisticsPlusPlusTest {
 	@Test
 	public void DSLtest() throws IOException {
 
+		
+		//On lit le fichier de paramètres .fact crée avec le DSL :
+	 	
 		//Initialisation des paramètres :
 		double threshold= 0.9;
+		
+		//Si threshold est <0.5, on le met à 0.5
+		if(threshold<0.5){
+			threshold=0.5;
+		}
+		
 		int maxFacts=5;
-		//ArrayList<String> features = new ArrayList<String>();
-		//features.add("quantile");
+		ArrayList<String> features = new ArrayList<String>();
+		features.add("number");
+		features.add("string");
+		features.add("boolean");
+		
+		//On vérifie les valeurs présentes dans la liste features du fichier de paramètres :
+		//On initialise tout à false :
+		boolean feature_nombre = false;
+		boolean feature_string = false;
+		boolean feature_boolean = false;
+		
+		//number : Si l'utilisateur veut les quantiles
+		if (isIn("number",features)){
+			feature_nombre = true;
+		}
+		
+		//string : Si l'utilisateur les modalités les plus présentes
+		if (isIn("string",features)){
+			feature_string=true;
+		}
+		
+		//boolean : Si l'utilisateur veut les booleans les plus présents
+		if (isIn("boolean",features)){
+			feature_boolean=true;
+		}
 
 		//Initialisation du chemin pour créer le dossier txt:
 		String path = "/home/nicolasd/Bureau/OpenCompare_data/data";
@@ -126,9 +159,12 @@ public class StatisticsPlusPlusTest {
 						//On stocke les variables dans une liste
 						colonne.add(cell);
 					}
+					
+					
+					
 
-					// Si la clonne contient des entiers, on fait un calcul des quantiles 
-					if (nombre){
+					// Si la clonne contient des entiers, on fait un calcul des quantiles si l'utilisateur l'a demandé
+					if (nombre & feature_nombre){
 
 						//On stocke le contenu de la colonne dans un tableau de Doubles
 						double[] valeurs = new double[colonne.size()];
@@ -161,8 +197,8 @@ public class StatisticsPlusPlusTest {
 					}
 
 
-					//Si la colonne contient des chaînes de caractères, on fait un compte par catégorie
-					if(chaine_caract){
+					//Si la colonne contient des chaînes de caractères, on fait un compte par catégorie si l'utilisateur l'a demandé
+					if(chaine_caract & feature_string){
 
 						//On stocke le contenu de la colonne dans un tableau de Strings
 						ArrayList<String> valeurs = new ArrayList<String>();
@@ -194,7 +230,7 @@ public class StatisticsPlusPlusTest {
 
 
 					// Si la clonne contient des booleens, on regarde le pourcentae de true et false 
-					if (bool){
+					if (bool & feature_boolean){
 
 						//On stocke le contenu de la colonne dans un tableau de booleens
 						boolean[] valeurs = new boolean[colonne.size()];
@@ -330,6 +366,18 @@ public class StatisticsPlusPlusTest {
 			}
 			else{
 				res="False";
+			}
+		}
+		return res;
+	}
+	
+	
+	//Fonction qui vérifie si une chaine de caractères est présente dans une liste :
+	public boolean isIn(String element, ArrayList<String> liste){
+		boolean res=false;
+		for (int i=0;i<liste.size();i++){
+			if(element.equals(liste.get(i))){
+				res=true;
 			}
 		}
 		return res;
