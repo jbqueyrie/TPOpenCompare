@@ -58,4 +58,8 @@ String csv = csvExporter.export(pcmContainer);
 
 =======
 # TPOpenCompare
-Génie logiciel : projet Open Compare à rendre avant le 20 décembre
+Génie logiciel : projet Open Compare à rendre avant le 14 décembre
+
+Auteurs :
+- Nicolas Delépine
+- Jean Queyrie
