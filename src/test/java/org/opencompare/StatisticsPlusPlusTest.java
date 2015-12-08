@@ -31,11 +31,32 @@ public class StatisticsPlusPlusTest {
 		//Initialisation des paramètres :
 		double threshold= 0.9;
 		int maxFacts=5;
-		ArrayList<String> features = new ArrayList<String>();
+		//ArrayList<String> features = new ArrayList<String>();
 		//features.add("quantile");
 
-		//Initialisation du chemin :
-		String path = "/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1";
+		//Initialisation du chemin pour créer le dossier txt:
+		String path = "/home/nicolasd/Bureau/OpenCompare_data/data";
+		String path_txt = "/home/nicolasd/Bureau/OpenCompare_data/txt";
+		File theDir = new File(path_txt);
+
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+		    System.out.println("creating directory txt :");
+		    boolean result = false;
+
+		    try{
+		        theDir.mkdir();
+		        result = true;
+		    } 
+		    catch(SecurityException se){
+		        //handle it
+		    }        
+		    if(result) {    
+		        System.out.println("DIR created");  
+		    }
+		}
+		
+		
 		File pcmFile = new File(path);
 		File[] filesInDir = pcmFile.listFiles();
 		PCMLoader loader = new KMFJSONLoader();
@@ -44,10 +65,12 @@ public class StatisticsPlusPlusTest {
 		for (File f : filesInDir) {
 			List<PCMContainer> pcmContainers = loader.load(f);
 			
+			//Récupération du nom de fichier
 			String name = f.getName();
 			name = name.substring(0,name.length()-4);
 			
-			File file = new File(path + "/txt/" + name + ".txt");
+			//Création des fichiers dans lesquels on stocke les faits
+			File file = new File(path_txt + "/" + name + ".txt");
 			file.createNewFile();
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
@@ -64,7 +87,6 @@ public class StatisticsPlusPlusTest {
 				System.out.println("\n\n");
 				writer.newLine();
 
-				int max = 0;
 				// Get the PCM
 				PCM pcm = pcmContainer.getPcm();
 				ArrayList<String> facts = new ArrayList<String>();
