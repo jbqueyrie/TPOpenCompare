@@ -1,6 +1,8 @@
 package org.opencompare;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,10 +34,8 @@ public class StatisticsPlusPlusTest {
 		ArrayList<String> features = new ArrayList<String>();
 		//features.add("quantile");
 
-
-
 		//Initialisation du chemin :
-		String path = "/home/nicolasd/Bureau/OpenCompare_data/data";
+		String path = "/home/jean-baptiste/Documents/GenieLogiciel/TP_OC/dataset-0.6.1";
 		File pcmFile = new File(path);
 		File[] filesInDir = pcmFile.listFiles();
 		PCMLoader loader = new KMFJSONLoader();
@@ -43,12 +43,26 @@ public class StatisticsPlusPlusTest {
 
 		for (File f : filesInDir) {
 			List<PCMContainer> pcmContainers = loader.load(f);
+			
+			String name = f.getName();
+			name = name.substring(0,name.length()-4);
+			
+			File file = new File(path + "/txt/" + name + ".txt");
+			file.createNewFile();
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
 			for (PCMContainer pcmContainer : pcmContainers ) {
+				
 				System.out.println("--------------------------------------");
+				writer.write("--------------------------------------");
+				writer.newLine();
 				System.out.println("Fichier : "+f.getName());
+				writer.write("Fichier : "+f.getName());
+				writer.newLine();
 				System.out.println("--------------------------------------");
+				writer.write("--------------------------------------");
 				System.out.println("\n\n");
+				writer.newLine();
 
 				int max = 0;
 				// Get the PCM
@@ -64,7 +78,7 @@ public class StatisticsPlusPlusTest {
 					boolean nombre = true;
 					boolean chaine_caract = true;
 					boolean bool = true;
-					
+
 
 					ArrayList<Cell> colonne = new ArrayList<Cell>();
 
@@ -73,16 +87,16 @@ public class StatisticsPlusPlusTest {
 						// Find the cell corresponding to the current feature and product
 						Cell cell = product.findCell(feature);
 						Value interp = cell.getInterpretation();
-						
+
 						//On vérifie le type de la colonne
 						if (!(interp instanceof IntegerValue || interp instanceof RealValue)){
 							nombre=false;
 						}
-						
+
 						if (!(interp instanceof StringValue)){
 							chaine_caract=false;
 						}
-						
+
 						if (!(interp instanceof BooleanValue)){
 							bool=false;
 						}
@@ -105,6 +119,8 @@ public class StatisticsPlusPlusTest {
 							}
 							else{
 								System.out.println("Problème de type");
+								writer.write("Problème de type");
+								writer.newLine();
 							}
 						}
 
@@ -153,8 +169,8 @@ public class StatisticsPlusPlusTest {
 						}
 
 					}
-					
-					
+
+
 					// Si la clonne contient des booleens, on regarde le pourcentae de true et false 
 					if (bool){
 
@@ -166,6 +182,8 @@ public class StatisticsPlusPlusTest {
 							}
 							else{
 								System.out.println("Problème de type");
+								writer.write("Problème de type");
+								writer.newLine();
 							}
 						}
 
@@ -182,20 +200,27 @@ public class StatisticsPlusPlusTest {
 						}
 
 					}
-					
+
 				}
 
 				if(facts.size()!=0){
 					for (int i=0;i<facts.size();i++){
 						System.out.println(facts.get(i));
+						writer.write(facts.get(i));
+						writer.newLine();
 					}
 				}
 				else{
 					System.out.println("La matrice ne contient pas de fait intéressant d'après les features demandées.");
+					writer.write("La matrice ne contient pas de fait intéressant d'après les features demandées.");
+					writer.newLine();
 				}
 				System.out.println("\n\n");
+				writer.newLine();
+				writer.newLine();
 
 			}
+			writer.close();
 		}
 	}
 
@@ -262,7 +287,7 @@ public class StatisticsPlusPlusTest {
 		}
 		return res;
 	}
-	
+
 	public static String pourcentage(boolean[] values, double threshold) {
 
 		String res = "";
@@ -275,7 +300,7 @@ public class StatisticsPlusPlusTest {
 					nb_bool++;
 				}
 			}
-			
+
 			//On regarde la valeur du pourcentage pour regarder la valeur à retourner
 			double percent = nb_bool/values.length;
 			if(percent>=threshold){
